@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Ticket {
+  id            String   @id @default(cuid())
+  uniqueTicketId String   @unique // TKT-{TIMESTAMP}-{RANDOM}
+  bookingId     String
+  ticketTypeId  String
+  ticketTypeName String
+  maxEntries    Int      @default(1)
+  usedEntries   Int      @default(0)
+  isValid       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([uniqueTicketId])
+  @@index([bookingId])
+  @@map("tickets")
+}

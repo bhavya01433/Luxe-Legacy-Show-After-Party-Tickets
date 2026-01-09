@@ -228,6 +228,16 @@ export default function Home() {
         </span>
       </a>
 
+      {/* Demo Ticket Button (for testing) */}
+      <a
+        href="/demo-ticket"
+        className="fixed bottom-5 left-5 inline-flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-900/80 px-4 py-2 text-xs font-medium text-neutral-300 backdrop-blur-sm transition hover:border-neutral-500 hover:bg-neutral-800 hover:text-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 sm:bottom-7 sm:left-7"
+        aria-label="View demo ticket (for testing)"
+      >
+        <span>🎫</span>
+        <span className="hidden sm:inline">Demo Ticket</span>
+      </a>
+
       {/* Payment Modal */}
       <PaymentModal
         ticket={selectedTicket}

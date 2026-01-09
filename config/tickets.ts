@@ -29,7 +29,7 @@ export const tickets: Ticket[] = [
   {
     id: "entry-cover-2-1000",
     name: "Entry + ₹1000 Cover (2 Persons)",
-    priceInr: 6000,
+    priceInr: 7000,
     entryDetails: "Access for 2 guests with shared entry.",
     coverDetails: "Includes ₹1000 redeemable cover on food & beverages.",
     includesComplimentaryFood: true,
