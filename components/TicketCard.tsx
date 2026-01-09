@@ -37,7 +37,7 @@ export function TicketCard({ ticket, onProceed }: TicketCardProps) {
             {formatCurrencyInr(ticket.priceInr)}
           </p>
           <p className="text-xs text-neutral-400">
-            Price + 18% GST • Total approx.{" "}
+            Price + 18% GST 
             <span className="font-medium text-neutral-100">
               {formatCurrencyInr(Math.round(totalWithGst))}
             </span>
