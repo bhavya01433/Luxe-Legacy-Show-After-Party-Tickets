@@ -62,10 +62,7 @@ export default function Home() {
                   <span className="text-neutral-100">Venue:</span> Details
                   shared post-booking
                 </p>
-                <p>
-                  <span className="text-neutral-100">Dress code:</span> Black
-                  tie / high fashion
-                </p>
+              
               </div>
               <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
                 <a
