@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateQrCodeImage, getVerificationUrl } from "@/lib/qrcode";
+import { generateQrCodeImage, getVerificationUrl, getQrCodePublicUrl } from "@/lib/qrcode";
 import { sendWhatsAppMessage, generateTicketWhatsAppMessage } from "@/lib/whatsapp";
 
 /**
@@ -57,10 +57,11 @@ export async function POST(
     // Generate verification URL
     const verificationUrl = getVerificationUrl(ticket.uniqueTicketId);
 
-    // Generate QR code image
+    // Generate QR code image (saves to /public/qr-codes/{ticketId}.png)
     let qrCodeUrl: string;
     try {
       qrCodeUrl = await generateQrCodeImage(ticket.uniqueTicketId, verificationUrl);
+      console.log(`QR code generated: ${qrCodeUrl}`);
     } catch (error) {
       console.error("Error generating QR code:", error);
       return NextResponse.json(
@@ -69,16 +70,13 @@ export async function POST(
       );
     }
 
-    // Generate full QR code URL for WhatsApp
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      process.env.VERCEL_URL ||
-      "http://localhost:3000";
-    const fullQrCodeUrl = `${baseUrl}${qrCodeUrl}`;
+    // Generate full public URL for QR code (must be accessible for Twilio)
+    const fullQrCodeUrl = getQrCodePublicUrl(ticket.uniqueTicketId);
+    console.log(`QR code public URL: ${fullQrCodeUrl}`);
 
-    // Generate WhatsApp message
+    // Generate WhatsApp message using user's name from database
     const whatsappMessage = generateTicketWhatsAppMessage(
-      ticket.userName,
+      ticket.userName!, // Fetched from database
       "Luxe Legacy Show – Afterparty",
       "16 January",
       ticket.ticketTypeName,
@@ -86,11 +84,15 @@ export async function POST(
       verificationUrl
     );
 
-    // Send WhatsApp message with QR code
+    console.log(`Sending WhatsApp to: ${ticket.whatsappNumber}`);
+    console.log(`User name: ${ticket.userName}`);
+
+    // Send WhatsApp message with QR code image
+    // Twilio will fetch the QR code image from the public URL
     const whatsappResult = await sendWhatsAppMessage({
-      to: ticket.whatsappNumber,
+      to: ticket.whatsappNumber!, // Fetched from database
       message: whatsappMessage,
-      mediaUrl: fullQrCodeUrl,
+      mediaUrl: fullQrCodeUrl, // Public URL - Twilio will download and attach
     });
 
     if (!whatsappResult.success) {
@@ -115,11 +117,14 @@ export async function POST(
       success: true,
       ticket: {
         id: updatedTicket.uniqueTicketId,
+        userName: updatedTicket.userName,
+        whatsappNumber: updatedTicket.whatsappNumber,
         isApproved: updatedTicket.isApproved,
         qrCodeSent: updatedTicket.qrCodeSent,
         whatsappSent: whatsappResult.success,
         whatsappMessageId: whatsappResult.messageId,
-        qrCodeUrl,
+        qrCodeUrl: fullQrCodeUrl,
+        verificationUrl,
       },
       message: whatsappResult.success
         ? "Ticket approved and QR code sent via WhatsApp"

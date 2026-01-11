@@ -79,10 +79,34 @@ export async function generateQrCodeDataUrl(
  * Gets the full verification URL for a ticket
  */
 export function getVerificationUrl(ticketId: string): string {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.VERCEL_URL ||
-    "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   return `${baseUrl}/verify/${ticketId}`;
+}
+
+/**
+ * Gets the base URL for the application
+ * Handles Vercel deployment URLs properly
+ */
+export function getBaseUrl(): string {
+  // In production, use NEXT_PUBLIC_BASE_URL
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL;
+  }
+
+  // On Vercel, use VERCEL_URL with https
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Local development
+  return "http://localhost:3000";
+}
+
+/**
+ * Gets the full public URL for a QR code image
+ */
+export function getQrCodePublicUrl(ticketId: string): string {
+  const baseUrl = getBaseUrl();
+  return `${baseUrl}/qr-codes/${ticketId}.png`;
 }
 

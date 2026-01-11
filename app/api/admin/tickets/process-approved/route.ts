@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateQrCodeImage, getVerificationUrl } from "@/lib/qrcode";
+import { generateQrCodeImage, getVerificationUrl, getQrCodePublicUrl } from "@/lib/qrcode";
 import { sendWhatsAppMessage, generateTicketWhatsAppMessage } from "@/lib/whatsapp";
 
 /**
@@ -72,16 +72,12 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Generate full QR code URL for WhatsApp
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL ||
-          process.env.VERCEL_URL ||
-          "http://localhost:3000";
-        const fullQrCodeUrl = `${baseUrl}${qrCodeUrl}`;
+        // Generate full public URL for QR code (must be accessible for Twilio)
+        const fullQrCodeUrl = getQrCodePublicUrl(ticket.uniqueTicketId);
 
-        // Generate WhatsApp message
+        // Generate WhatsApp message using user's name from database
         const whatsappMessage = generateTicketWhatsAppMessage(
-          ticket.userName,
+          ticket.userName!,
           "Luxe Legacy Show – Afterparty",
           "16 January",
           ticket.ticketTypeName,
@@ -89,9 +85,9 @@ export async function POST(request: NextRequest) {
           verificationUrl
         );
 
-        // Send WhatsApp message with QR code
+        // Send WhatsApp message with QR code image
         const whatsappResult = await sendWhatsAppMessage({
-          to: ticket.whatsappNumber,
+          to: ticket.whatsappNumber!,
           message: whatsappMessage,
           mediaUrl: fullQrCodeUrl,
         });
@@ -109,9 +105,11 @@ export async function POST(request: NextRequest) {
 
         results.push({
           ticketId: ticket.uniqueTicketId,
+          userName: ticket.userName,
+          whatsappNumber: ticket.whatsappNumber,
           success: whatsappResult.success,
           whatsappMessageId: whatsappResult.messageId,
-          qrCodeUrl,
+          qrCodeUrl: fullQrCodeUrl,
           error: whatsappResult.error,
         });
       } catch (error: any) {

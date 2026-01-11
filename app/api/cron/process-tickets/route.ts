@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateQrCodeImage, getVerificationUrl } from "@/lib/qrcode";
+import { generateQrCodeImage, getVerificationUrl, getQrCodePublicUrl } from "@/lib/qrcode";
 import { sendWhatsAppMessage, generateTicketWhatsAppMessage } from "@/lib/whatsapp";
 
 /**
@@ -49,22 +49,18 @@ export async function POST(request: NextRequest) {
         // Generate verification URL
         const verificationUrl = getVerificationUrl(ticket.uniqueTicketId);
 
-        // Generate QR code image
-        const qrCodeUrl = await generateQrCodeImage(
+        // Generate QR code image (saves to /public/qr-codes/)
+        await generateQrCodeImage(
           ticket.uniqueTicketId,
           verificationUrl
         );
 
-        // Generate full QR code URL for WhatsApp
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL ||
-          process.env.VERCEL_URL ||
-          "http://localhost:3000";
-        const fullQrCodeUrl = `${baseUrl}${qrCodeUrl}`;
+        // Get full public URL for QR code (must be accessible for Twilio)
+        const fullQrCodeUrl = getQrCodePublicUrl(ticket.uniqueTicketId);
 
-        // Generate WhatsApp message
+        // Generate WhatsApp message using user's name from database
         const whatsappMessage = generateTicketWhatsAppMessage(
-          ticket.userName,
+          ticket.userName!,
           "Luxe Legacy Show – Afterparty",
           "16 January",
           ticket.ticketTypeName,
@@ -72,9 +68,9 @@ export async function POST(request: NextRequest) {
           verificationUrl
         );
 
-        // Send WhatsApp message
+        // Send WhatsApp message with QR code image
         const whatsappResult = await sendWhatsAppMessage({
-          to: ticket.whatsappNumber,
+          to: ticket.whatsappNumber!,
           message: whatsappMessage,
           mediaUrl: fullQrCodeUrl,
         });

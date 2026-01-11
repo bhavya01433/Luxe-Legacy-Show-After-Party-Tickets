@@ -37,6 +37,7 @@ export function formatWhatsAppNumber(phone: string): string {
 
 /**
  * Sends WhatsApp message using Twilio
+ * Works with Twilio WhatsApp Sandbox for testing
  */
 export async function sendWhatsAppMessage({
   to,
@@ -55,18 +56,33 @@ export async function sendWhatsAppMessage({
     const twilio = require("twilio")(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
     const formattedTo = formatWhatsAppNumber(to);
 
+    // Log for debugging (remove in production)
+    console.log(`Sending WhatsApp to: ${formattedTo}`);
+    if (mediaUrl) {
+      console.log(`QR Code URL: ${mediaUrl}`);
+    }
+
     const messageData: any = {
       from: TWILIO_WHATSAPP_FROM,
       to: `whatsapp:${formattedTo}`,
       body: message,
     };
 
-    // Add media if provided
+    // Add media if provided (QR code image)
+    // Twilio requires the media URL to be publicly accessible
     if (mediaUrl) {
-      messageData.mediaUrl = [mediaUrl];
+      // Ensure URL is absolute and accessible
+      const absoluteMediaUrl = mediaUrl.startsWith("http")
+        ? mediaUrl
+        : `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}${mediaUrl}`;
+      
+      messageData.mediaUrl = [absoluteMediaUrl];
+      console.log(`Attaching media: ${absoluteMediaUrl}`);
     }
 
     const result = await twilio.messages.create(messageData);
+
+    console.log(`WhatsApp message sent successfully. SID: ${result.sid}`);
 
     return {
       success: true,
@@ -74,9 +90,22 @@ export async function sendWhatsAppMessage({
     };
   } catch (error: any) {
     console.error("Error sending WhatsApp message:", error);
+    
+    // Provide more detailed error information
+    let errorMessage = error.message || "Failed to send WhatsApp message";
+    
+    // Common Twilio errors
+    if (error.code === 21211) {
+      errorMessage = "Invalid phone number format";
+    } else if (error.code === 21608) {
+      errorMessage = "Unsubscribed recipient (not joined to WhatsApp Sandbox)";
+    } else if (error.code === 21610) {
+      errorMessage = "Recipient not opted in to receive messages";
+    }
+    
     return {
       success: false,
-      error: error.message || "Failed to send WhatsApp message",
+      error: errorMessage,
     };
   }
 }
