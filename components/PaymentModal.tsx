@@ -14,7 +14,7 @@ type PaymentModalProps = {
   ticket: Ticket | null;
   isOpen: boolean;
   onClose: () => void;
-  onPaymentConfirmed?: (ticket: Ticket, bookingId: string) => void;
+  onPaymentConfirmed?: (ticket: Ticket, bookingId: string, uniqueTicketId: string) => void;
 };
 
 const formatCurrencyInr = (amount: number) =>
@@ -56,16 +56,9 @@ export function PaymentModal({
 
   if (!isOpen || !ticket) return null;
 
-  // If payment is confirmed, show ticket display
+  // Don't show modal if payment is confirmed - ticket will be shown inline
   if (isPaymentConfirmed && bookingId && uniqueTicketId) {
-    return (
-      <TicketDisplay
-        ticket={ticket}
-        bookingId={bookingId}
-        uniqueTicketId={uniqueTicketId}
-        onClose={onClose}
-      />
-    );
+    return null;
   }
 
   const gstAmount = ticket.priceInr * GST_RATE;
@@ -134,9 +127,15 @@ export function PaymentModal({
       setIsPaymentConfirmed(true);
       setStep("confirmed");
 
+      // Close modal and trigger callback to show ticket inline
       if (onPaymentConfirmed) {
-        onPaymentConfirmed(ticket, newBookingId);
+        onPaymentConfirmed(ticket, newBookingId, newUniqueTicketId);
       }
+      
+      // Close modal after a brief delay
+      setTimeout(() => {
+        onClose();
+      }, 300);
     } catch (error: any) {
       console.error("Error creating free ticket:", error);
       alert(`Error creating ticket: ${error.message}. Please try again.`);
@@ -185,9 +184,15 @@ export function PaymentModal({
       setIsPaymentConfirmed(true);
       setStep("confirmed");
 
+      // Close modal and trigger callback to show ticket inline
       if (onPaymentConfirmed) {
-        onPaymentConfirmed(ticket, newBookingId);
+        onPaymentConfirmed(ticket, newBookingId, newUniqueTicketId);
       }
+      
+      // Close modal after a brief delay
+      setTimeout(() => {
+        onClose();
+      }, 300);
 
       // Show message about approval
       if (result.requiresApproval) {

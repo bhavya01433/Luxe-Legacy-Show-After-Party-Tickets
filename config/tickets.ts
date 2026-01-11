@@ -23,7 +23,7 @@ export const tickets: Ticket[] = [
   {
     id: "only-entry-1",
     name: "Only Entry (1 Person)",
-    priceInr: 5,
+    priceInr: 2500,
     entryDetails: "Access for 1 guest to the Luxe Legacy Show – Afterparty.",
     coverDetails: "No cover amount included.",
     includesComplimentaryFood: true,

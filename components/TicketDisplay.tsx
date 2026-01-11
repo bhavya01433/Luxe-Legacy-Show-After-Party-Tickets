@@ -27,7 +27,7 @@ function generateVerificationUrl(uniqueTicketId: string): string {
   const origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : "https://your-domain.com";
+      : "https://luxe-legacy-show-after-party-ticket.vercel.app/";
   return `${origin}/verify/${uniqueTicketId}`;
 }
 
