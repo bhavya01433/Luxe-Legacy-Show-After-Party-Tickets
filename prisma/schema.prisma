@@ -18,10 +18,25 @@ model Ticket {
   maxEntries    Int      @default(1)
   usedEntries   Int      @default(0)
   isValid       Boolean  @default(true)
+  
+  // User information
+  userName      String?
+  whatsappNumber String?
+  email         String?
+  
+  // Approval and QR code status
+  isApproved    Boolean  @default(false)
+  qrCodeSent    Boolean  @default(false)
+  qrCodeSentAt  DateTime?
+  approvedAt    DateTime?
+  approvedBy    String?  // Admin user ID who approved
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([uniqueTicketId])
   @@index([bookingId])
+  @@index([whatsappNumber])
+  @@index([isApproved])
   @@map("tickets")
 }

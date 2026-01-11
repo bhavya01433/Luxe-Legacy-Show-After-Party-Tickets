@@ -90,8 +90,8 @@ export function TicketDisplay({
                   <p className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
                     Status
                   </p>
-                  <p className="mt-1 text-sm font-medium text-emerald-400">
-                    ✓ Confirmed
+                  <p className="mt-1 text-sm font-medium text-amber-400">
+                    ⏳ Pending Approval
                   </p>
                 </div>
               </div>
