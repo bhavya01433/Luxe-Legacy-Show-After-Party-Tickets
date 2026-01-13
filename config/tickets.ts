@@ -11,15 +11,15 @@ export type Ticket = {
 export const GST_RATE = 0.18;
 
 export const tickets: Ticket[] = [
-  {
-    id: "free-test-entry",
-    name: "Free Test Entry (1 Person) - Testing Only",
-    priceInr: 0,
-    entryDetails: "Free test ticket for testing the complete flow. Access for 1 guest.",
-    coverDetails: "No cover amount included.",
-    includesComplimentaryFood: true,
-    isFree: true, // Skip payment for this ticket
-  },
+  // {
+  //   id: "free-test-entry",
+  //   name: "Free Test Entry (1 Person) - Testing Only",
+  //   priceInr: 0,
+  //   entryDetails: "Free test ticket for testing the complete flow. Access for 1 guest.",
+  //   coverDetails: "No cover amount included.",
+  //   includesComplimentaryFood: true,
+  //   isFree: true, // Skip payment for this ticket
+  // },
   {
     id: "only-entry-1",
     name: "Only Entry (1 Person)",

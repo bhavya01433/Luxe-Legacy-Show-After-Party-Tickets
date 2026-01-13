@@ -1,12 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { TicketCard } from "@/components/TicketCard";
-import { PaymentModal } from "@/components/PaymentModal";
-import { TicketDisplay } from "@/components/TicketDisplay";
-import { ScrollToTicket } from "@/components/ScrollToTicket";
 import { tickets } from "@/config/tickets";
-import type { Ticket } from "@/config/tickets";
 
 const WHATSAPP_NUMBER = "7014133811"; 
 
@@ -18,52 +13,6 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent
 )}`;
 
 export default function Home() {
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [confirmedTicket, setConfirmedTicket] = useState<{
-    ticket: Ticket;
-    bookingId: string;
-    uniqueTicketId: string;
-  } | null>(null);
-  const [showScrollMessage, setShowScrollMessage] = useState(false);
-
-  const handleProceedWithUpi = (ticket: Ticket) => {
-    setSelectedTicket(ticket);
-    setIsPaymentModalOpen(true);
-  };
-
-  const handleClosePaymentModal = () => {
-    setIsPaymentModalOpen(false);
-    // Clear selected ticket after a short delay to allow modal close animation
-    setTimeout(() => setSelectedTicket(null), 200);
-  };
-
-  const handlePaymentConfirmed = (ticket: Ticket, bookingId: string, uniqueTicketId: string) => {
-    // Close modal
-    setIsPaymentModalOpen(false);
-    setSelectedTicket(null);
-    
-    // Set confirmed ticket to show inline
-    setConfirmedTicket({
-      ticket,
-      bookingId,
-      uniqueTicketId,
-    });
-
-    // Show scroll message
-    setShowScrollMessage(true);
-
-    // Auto-scroll to ticket after a brief delay
-    setTimeout(() => {
-      const ticketElement = document.getElementById(`ticket-${uniqueTicketId}`);
-      if (ticketElement) {
-        ticketElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    }, 500);
-  };
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-50">
@@ -151,7 +100,6 @@ export default function Home() {
               <TicketCard
                 key={ticket.id}
                 ticket={ticket}
-                onProceed={handleProceedWithUpi}
               />
             ))}
           </div>
@@ -249,20 +197,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Confirmed Ticket Display */}
-        {confirmedTicket && (
-          <section
-            id={`ticket-${confirmedTicket.uniqueTicketId}`}
-            className="py-10 sm:py-12 lg:py-14 border-t border-neutral-900"
-          >
-            <TicketDisplay
-              ticket={confirmedTicket.ticket}
-              bookingId={confirmedTicket.bookingId}
-              uniqueTicketId={confirmedTicket.uniqueTicketId}
-              onClose={() => setConfirmedTicket(null)}
-            />
-          </section>
-        )}
       </div>
 
       {/* Floating WhatsApp button for table booking */}
@@ -288,25 +222,6 @@ export default function Home() {
         <span className="hidden sm:inline">Demo Ticket</span>
       </a> */}
 
-      {/* Payment Modal */}
-      <PaymentModal
-        ticket={selectedTicket}
-        isOpen={isPaymentModalOpen}
-        onClose={handleClosePaymentModal}
-        onPaymentConfirmed={(ticket, bookingId, uniqueTicketId) => {
-          handlePaymentConfirmed(ticket, bookingId, uniqueTicketId);
-        }}
-      />
-
-      {/* Scroll Down Message */}
-      {showScrollMessage && confirmedTicket && (
-        <ScrollToTicket
-          ticketId={confirmedTicket.uniqueTicketId}
-          onScrollComplete={() => {
-            setTimeout(() => setShowScrollMessage(false), 3000);
-          }}
-        />
-      )}
     </main>
   );
 }

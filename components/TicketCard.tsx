@@ -1,9 +1,9 @@
 import type { Ticket } from "@/config/tickets";
 import { GST_RATE } from "@/config/tickets";
+import { buildWhatsAppLink } from "@/lib/whatsapp-booking";
 
 type TicketCardProps = {
   ticket: Ticket;
-  onProceed?: (ticket: Ticket) => void;
 };
 
 const formatCurrencyInr = (amount: number) =>
@@ -13,9 +13,10 @@ const formatCurrencyInr = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-export function TicketCard({ ticket, onProceed }: TicketCardProps) {
+export function TicketCard({ ticket }: TicketCardProps) {
   const gstAmount = ticket.priceInr * GST_RATE;
   const totalWithGst = ticket.priceInr + gstAmount;
+  const whatsappUrl = buildWhatsAppLink(ticket);
 
   return (
     <article
@@ -67,20 +68,17 @@ export function TicketCard({ ticket, onProceed }: TicketCardProps) {
       </div>
 
       <div className="mt-5 pt-4 border-t border-neutral-800">
-        <button
-          type="button"
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex w-full items-center justify-center rounded-full bg-amber-300 px-4 py-2.5 text-sm font-semibold tracking-wide text-neutral-950 shadow-sm transition hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
-          onClick={() => {
-            if (onProceed) {
-              onProceed(ticket);
-            }
-          }}
-          aria-label={`Proceed with UPI for ${ticket.name}`}
+          aria-label={`Book ${ticket.name} via WhatsApp`}
           data-ticket-id={ticket.id}
           data-ticket-price={ticket.priceInr}
         >
-          Proceed with UPI
-        </button>
+          Book via WhatsApp
+        </a>
       </div>
     </article>
   );
